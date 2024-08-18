@@ -1,61 +1,25 @@
-## DevOps Engineer Home Assignment
-Below is a home assignment for a DevOps Engineer position. You are requested to:
-1. Understand the requirements and use case. You may contact the interviewer for further clarification.
-2. Implement and run your deployment plan for backend environment using the most efficient tools.
-3. Present your deployment and result in the next interview session.
+# Backend services and infra
 
-### Requirements
-You are a DevOps engineer in a project of building an online orders system. Your task is to deploy a prototype created by the development team and make it available on the public internet.
+## Installation guide of the infra
 
-Below is the information given by the development team.
+The infra is written in Terraform
+There's a `modules` directory for the EKS module and the addons modules for EKS
 
-### Global Environment Requirement
-- Start a MongoDB instance, it should be reachable by the prototype code and the development team
+1. Install terraform version 1.6.X
+2. Go to the `terraform/env/<env>` directory
+3. First of all create the base network infra, `cd network`  and run `terraform init` and `apply`
+4. Once the network part is created cd into the `eks` dir and run apply again
+5. The EKS cluster is now created as well
+NOTE: The EKS cluster is configured with 2 static nodes, which means it won't autoscale it.
 
-### Backend Requirements
-- NodeJS LTS version
-- Set environment variable `MONGODB_URL="<mongodb connection url>"`, where `<mongodb connection url>` must match the [official mongodb node driver uri](https://docs.mongodb.com/drivers/node/current/fundamentals/connection/#connection-uri)
-- Navigate to package(s) directory `cd packages/<package>`
-- Build using npm `npm install`
-- Start using node `node index.js`
+## Installation guide of the of the services/infra on the EKS
 
-### Cloud Infrastructure Requirement
-Your deployment must meet the following criteria:
-- A working deployment which reachable through internet
-- IaC (Infrastructure as Code) deployment for the created AWS resources. You may use Cloudformation, Terraform or AWS CDK for that purpose 
-- Documentation for the deployment plan and the resources created
+1. Go to the `helm` directory
+2. Go to the `external-secrets` dir and run `helm install -n kube-system -f values.yaml external-secrets-store .` -  this will install the cluster secret store which will be used to access the secrets in the secrets manager.
+3. Go to `k8s-manifest` and run `kubectl apply -f gp3-storageclass-1b.yaml` this will install the storage class which will be used by mongo
+4. Go to the `mongodb` dir and run `helm dependency update` and `helm upgrade --install -n mongodb --create-namespace -f values.yaml mongodb .` - this will install the `mongodb` helm chart
+5. Install the service manifests - Go to `helm/service1` and `kubectl apply -f external-secret.yaml deployment.yaml svc.yaml`
 
-### Guidebook on completing the assignment
-- Your implementation should be commited to your own public git repository, including any IaC, documentation, etc (fork this repository)
-- Create dockerfile to match the deployment requirements
-- Create all resources using IaC tools
-- Use [Amazon Elastic Container Registry](https://us-east-1.console.aws.amazon.com/ecr/get-started) to push the image to a private repository
-- Create a [Kubernetes](https://us-east-1.console.aws.amazon.com/eks/home) cluster and deploy the service to the cluster
-- Create a MongoDB instance in the Kubernetes cluster (do not use any Mongo service such as DocumentDB) and make it reachable for the deployed service, update the `MONGODB_URL` environment variable to match the mongodb connection url 
-- Expose the service to the internet using AWS Load Balancer, AWS Elastic IP, and Network Interface
-- Document the deployment steps and the resources created in the deployment as clear and detailed as possible
-- **Provide a publicly accessible URL of the service**
 
-### Bonus Points (Optional)
-Bonus points are optional, but will be considered as a plus if implemented. Please prioritize completing the main requirements before investing time in the bonus section.
-You may choose to implement one or more of the following:
-- Supply the deployment with CI/CD automated process to push the image to ECR and deploy it to the cluster
-- Monitor the service and handle recovery for different resources
-- Maintain and handle the scaling of the service
-- Maintain and handle high availability of the service according to best practices
-- Secure the deployments according to best practices (rate limits, relevant security groups, etc)
-- Consider multi-tenant and multi-environment deployment 
-- Documentation for disaster recovery plan
-- Any other improvement that you think is relevant for this project
+You can view the deployed service at: `http://k8s-services-service1-2191cf5334-1268943612.eu-west-1.elb.amazonaws.com`
 
-### How will the assignment be evaluated
-When evaluating the assignment, we will consider the following:
-- The deployment plan and the resources are created and working as expected. We will trigger the API using the supplied URL and expect a valid response
-- The documentation is clear and detailed, we will follow the documentation to understand the deployment process
-- Best practices are followed across all functional and non-functional requirements (for example: security, cost optimization, reliability, etc)
-
-### General Notes
-- For performing the assignment, you will be given with AWS credentials (console and programmatic) to a dedicated account, **DO NOT COMMIT THEM IN THE CODE**
-- Make sure to create small tier resources, as the prototype demands minimal working loads
-- This assignment can be implemented in more than one way, if any further permissions are required for your implementation, contact us
-- If you have any other questions, please do not hesitate to ask

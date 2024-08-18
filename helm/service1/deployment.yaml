@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1-deployment
+  namespace: services
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: service1
+  template:
+    metadata:
+      labels:
+        app: service1
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: service1
+      containers:
+      - name: service1
+        image: 851725552187.dkr.ecr.eu-west-1.amazonaws.com/service1_dev:latest
+        imagePullPolicy: Always
+        env:
+        - name: MONGODB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: service1-mongo
+              key: mongodb_root_password
+        - name: MONGODB_URL
+          value: mongodb://root:$(MONGODB_ROOT_PASSWORD)@k8s-mongodb-mongodb-f677a07723-ce22479dfa1685db.elb.eu-west-1.amazonaws.com:27017
+
+        resources:
+          requests:
+            memory: "500Mi"
+            cpu: "250m"
+          limits:
+            memory: "500Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          successThreshold: 1
+      restartPolicy: Always

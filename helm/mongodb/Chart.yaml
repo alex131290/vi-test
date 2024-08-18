@@ -1,0 +1,10 @@
+apiVersion: v2
+name: mongodb
+description: MongoDB(R) is a relational open source NoSQL database. Easy to use, it stores data in JSON-like documents. Automated scalability and high-performance. Ideal for developing cloud native applications.
+type: application
+version: 15.6.19
+appVersion: "15.6.19"
+dependencies:
+  - name: mongodb
+    version: 15.6.19
+    repository: https://charts.bitnami.com/bitnami

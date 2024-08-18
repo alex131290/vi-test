@@ -1,0 +1,21 @@
+externalSecrets:
+  - name: mongodb-creds
+    data:
+      - remoteRef:
+          key: /devops/mongodb-password
+        secretKey: mongodb-root-password
+mongodb:
+  auth:
+    existingSecret: mongodb-creds
+  global:
+    storageClass: gp3-persistent-1b
+  service:
+    type: LoadBalancer
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      service.beta.kubernetes.io/aws-load-balancer-type: ""
+      service.beta.kubernetes.io/load-balancer-source-ranges: 0.0.0.0/0
+      service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-04e71368436de1cec, subnet-049846a4877a2690c, subnet-0d379bbcfb77c6f3f 
+  persistence:
+    size: 50Gi
+    storageClass: gp3-persistent-1b

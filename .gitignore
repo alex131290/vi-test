@@ -1,3 +1,19 @@
 node_modules/
 /.idea/*
 .DS_Store
+
+# ASDF Tool Versions
+.tool-versions
+
+# TF state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+terraform.tfstate*
+
+# TF debug files
+terragrunt-debug.tfvars.json
+
+# TF module directories
+**/.terraform/*
+**/.terragrunt-cache/*

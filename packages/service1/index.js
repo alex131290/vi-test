@@ -30,6 +30,10 @@ async function connectToDatabase() {
 async function main() {
     const {counterCollection, orderCollection} = await connectToDatabase();
 
+    app.get('/health', (req, res) => {
+        res.status(200).json({ status: 'UP' });
+    });
+
     app.get("/orders", async (req, res) => {
         const orders = await orderCollection.find({}).toArray();
         res.json(orders);
